@@ -12,6 +12,11 @@ public class BaseInventoryUI extends InventoryUI {
     }
 
     @Override
+    public int getUISlotAmount() {
+        return 0;
+    }
+
+    @Override
     public boolean isSubInventory() {
         return false;
     }

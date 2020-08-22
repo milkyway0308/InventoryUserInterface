@@ -2,16 +2,11 @@ package skywolf46.iui.test;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import skywolf46.iui.abstraction.InventoryUI;
-import skywolf46.iui.abstraction.ItemProvider;
-import skywolf46.iui.abstraction.ItemSlotHandler;
 import skywolf46.iui.abstraction.PageItemProvider;
-import skywolf46.iui.data.ItemSlot;
-import skywolf46.iui.impl.PageInventoryUI;
+import skywolf46.iui.abstraction.PageInventoryUI;
 
 import java.util.HashMap;
 

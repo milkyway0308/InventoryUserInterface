@@ -1,11 +1,8 @@
-package skywolf46.iui.impl;
+package skywolf46.iui.abstraction;
 
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.Inventory;
-import skywolf46.iui.abstraction.InventoryUI;
-import skywolf46.iui.abstraction.ItemProvider;
-import skywolf46.iui.abstraction.ItemSlotHandler;
 import skywolf46.iui.data.ItemSlot;
 import skywolf46.iui.util.EmptyViewer;
 
@@ -26,7 +23,17 @@ public abstract class PageInventoryUI extends InventoryUI {
 
     @Override
     public int getUIBasedSlot(int rawSlot) {
-        return (prevSlot.contains(rawSlot) ? -3 : (nextSlot.contains(rawSlot) ? -2 : slots.indexOf(rawSlot)));
+        return slots.indexOf(rawSlot);
+    }
+
+    @Override
+    public int getUIBasedRawSlot(int slot) {
+        return (prevSlot.contains(slot) ? -3 : (nextSlot.contains(slot) ? -2 : slots.get(slot)));
+    }
+
+    @Override
+    public int getUISlotAmount() {
+        return slots.size();
     }
 
     @Override
@@ -35,7 +42,6 @@ public abstract class PageInventoryUI extends InventoryUI {
     }
 
     public PageInventoryUI addSlot(int slot, ItemProvider pr) {
-        System.out.println("addSlot " + slot);
         slots.add(slot);
         super.setSlot(slot, new ItemSlot(this, slot).setProvider(pr));
         return this;

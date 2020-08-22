@@ -3,7 +3,6 @@ package skywolf46.iui.abstraction;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import skywolf46.iui.impl.PageInventoryUI;
 
 import java.util.HashMap;
 

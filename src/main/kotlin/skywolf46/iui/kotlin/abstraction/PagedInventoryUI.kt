@@ -4,6 +4,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
+import skywolf46.iui.kotlin.data.PagedPlayerInventoryPair
 
 abstract class PagedInventoryUI(val pageName: String, title: String, invSize: Int) : InventoryUI(title, invSize) {
 
@@ -19,48 +20,54 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
         doUpdate(pl, inv)
     }
 
-    fun nextPage(slot: Int, block: Player.(Inventory) -> ItemStack) {
+    fun nextPage(slot: Int, block: PagedPlayerInventoryPair.() -> ItemStack) {
         nextPage(slot, { true }, block)
     }
 
 
+    @Suppress("UNCHECKED_CAST")
     fun nextPage(
         slot: Int,
         clicker: InventoryClickEvent.(Inventory) -> Boolean,
-        block: Player.(Inventory) -> ItemStack,
+        block: PagedPlayerInventoryPair.() -> ItemStack,
     ) {
         click(slot) {
             isCancelled = true
-            if (!clicker(this, it))
+            if (!clicker(this, it.inventory))
                 return@click
-            with(it.getUI() as PagedInventoryUI) {
-                setPage(whoClicked as Player, inventory, this.getPage(it) + 1)
+            with(inventory.getUI() as PagedInventoryUI) {
+                setPage(whoClicked as Player, inventory, this.getPage(inventory) + 1)
             }
         }
-        update(slot, block)
+        update(slot) {
+            return@update block(PagedPlayerInventoryPair(player, inventory))
+        }
     }
 
 
-    fun previousPage(slot: Int, block: Player.(Inventory) -> ItemStack) {
+    fun previousPage(slot: Int, block: PagedPlayerInventoryPair.() -> ItemStack) {
         previousPage(slot, { true }, block)
     }
 
 
+    @Suppress("UNCHECKED_CAST")
     fun previousPage(
         slot: Int,
-        clicker: InventoryClickEvent.(Inventory) -> Boolean,
-        block: Player.(Inventory) -> ItemStack,
+        clicker: InventoryClickEvent.(PagedInventoryUI) -> Boolean,
+        block: PagedPlayerInventoryPair.() -> ItemStack,
     ) {
         click(slot) {
             isCancelled = true
-            with(it.getUI() as PagedInventoryUI) {
-                if(getPage(it) <= 1)
+            with(it.inventory.getUI() as PagedInventoryUI) {
+                if (getPage(it.inventory) <= 1)
                     return@click
-                if (!clicker(this@click, it))
+                if (!clicker(this@click, this))
                     return@click
-                setPage(whoClicked as Player, inventory, this.getPage(it) + 1)
+                setPage(whoClicked as Player, inventory, this.getPage(it.inventory) + 1)
             }
         }
-        update(slot, block)
+        update(slot) {
+            return@update block(PagedPlayerInventoryPair(player, inventory))
+        }
     }
 }

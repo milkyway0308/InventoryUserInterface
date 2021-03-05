@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.InventoryView
 import org.bukkit.inventory.ItemStack
 import skywolf46.extrautility.util.ifFalse
 import skywolf46.extrautility.util.invoke
@@ -32,6 +33,7 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
     private val globalDragger: MutableList<InventoryDragEvent.(PlayerInventoryPair) -> Unit> = ArrayList()
     private val globalInnerDragger: MutableList<InventoryDragEvent.(PlayerInventoryPair) -> Unit> = ArrayList()
     private val globalOuterDragger: MutableList<InventoryDragEvent.(PlayerInventoryPair) -> Unit> = ArrayList()
+    private val mixedDragger: MutableList<InventoryDragEvent.(PlayerInventoryPair) -> Unit> = ArrayList()
     private val globalCloser: MutableList<InventoryCloseEvent.(PlayerInventoryPair) -> Unit> = ArrayList()
     private val subInventory: MutableMap<String, InventoryUI> = HashMap()
     private val subInventoryClass: MutableMap<KClass<out InventoryUI>, MutableList<InventoryUI>> = HashMap()
@@ -65,17 +67,39 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
 
     fun onClick(ev: InventoryDragEvent) {
         globalDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-        ev.inventorySlots.forEach {
+        var dragStatus = 0
+        ev.newItems.keys.forEach {
+            val slot = ev.view.convertSlot(it)
             dragger[it]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
-            (it < ev.inventory.size) {
-                globalInnerDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-                innerDragger[it]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+            (it < ev.view.topInventory.size) {
+                innerDragger[slot]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+                if (dragStatus == 2)
+                    dragStatus = 3
+                else if (dragStatus == 0)
+                    dragStatus = 1
             }.ifFalse {
-                globalOuterDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-                outerDragger[it - ev.inventory.size]?.invoke(ev,
+                outerDragger[slot]?.invoke(ev,
                     PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+                if (dragStatus == 1)
+                    dragStatus = 3
+                else if (dragStatus == 0)
+                    dragStatus = 2
             }
         }
+        when (dragStatus) {
+            1 -> {
+                globalInnerDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
+            }
+            2 -> {
+                globalOuterDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
+
+            }
+            3 -> {
+                mixedDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
+            }
+        }
+
+
         afterDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
         subInventory.values.forEach { inv ->
             inv.onClick(ev)
@@ -157,6 +181,10 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
         globalOuterDragger.add(block)
     }
 
+    fun mixedDrag(block: InventoryDragEvent.(PlayerInventoryPair) -> Unit) {
+        mixedDragger.add(block)
+    }
+
     fun afterDrag(slot: Int, block: InventoryDragEvent.(PlayerInventoryPair) -> Unit) {
         afterDragger[slot] = block
     }
@@ -202,8 +230,9 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
     class InventoryReady(val ui: InventoryUI) {
         val map: MutableMap<String, Any> = HashMap()
 
-        fun append(str: String, data: Any) {
+        fun append(str: String, data: Any): InventoryReady {
             map[str] = data
+            return this
         }
 
         fun toInventory(pl: Player): Inventory {

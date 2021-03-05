@@ -69,10 +69,11 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
             dragger[it]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
             (it < ev.inventory.size) {
                 globalInnerDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-                innerDragger[it]?.invoke(ev,PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+                innerDragger[it]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
             }.ifFalse {
                 globalOuterDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-                outerDragger[it - ev.inventory.size]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+                outerDragger[it - ev.inventory.size]?.invoke(ev,
+                    PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
             }
         }
         afterDragger.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
@@ -169,9 +170,16 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
         updater[slot] = block
     }
 
+
     fun create(pl: Player): Inventory {
         val inv = Bukkit.createInventory(null, invSize, title)
         modify(pl, inv)
+        return inv
+    }
+
+    fun createOnly(pl: Player): Inventory {
+        val inv = Bukkit.createInventory(null, invSize, title)
+        modifyOnly(pl, inv)
         return inv
     }
 
@@ -182,6 +190,31 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
         inv.updateUI(pl)
     }
 
+
+    fun modifyOnly(pl: Player, inv: Inventory) {
+        (EmptyViewer.from(inv) ?: run {
+            EmptyViewer(this).apply { inv.viewers.add(this) }
+        }).uI = this
+    }
+
+    fun ready() = InventoryReady(this)
+
+    class InventoryReady(val ui: InventoryUI) {
+        val map: MutableMap<String, Any> = HashMap()
+
+        fun append(str: String, data: Any) {
+            map[str] = data
+        }
+
+        fun toInventory(pl: Player): Inventory {
+            val inv = ui.createOnly(pl)
+            map.forEach { (key, value) ->
+                inv.setValue(key, value)
+            }
+            inv.updateUI(pl)
+            return inv
+        }
+    }
 }
 
 fun Inventory.updateUI(pl: Player): Inventory {

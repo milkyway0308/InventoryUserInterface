@@ -21,12 +21,12 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
     }
 
     fun nextPage(slot: Int, block: PagedPlayerInventoryPair.() -> ItemStack) {
-        nextPage(slot, { true }, block)
+        nextPageListener(slot, { true }, block)
     }
 
 
     @Suppress("UNCHECKED_CAST")
-    fun nextPage(
+    fun nextPageListener(
         slot: Int,
         clicker: InventoryClickEvent.(Inventory) -> Boolean,
         block: PagedPlayerInventoryPair.() -> ItemStack,
@@ -46,12 +46,12 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
 
 
     fun previousPage(slot: Int, block: PagedPlayerInventoryPair.() -> ItemStack) {
-        previousPage(slot, { true }, block)
+        previousPageListener(slot, { true }, block)
     }
 
 
     @Suppress("UNCHECKED_CAST")
-    fun previousPage(
+    fun previousPageListener(
         slot: Int,
         clicker: InventoryClickEvent.(PagedInventoryUI) -> Boolean,
         block: PagedPlayerInventoryPair.() -> ItemStack,
@@ -70,4 +70,5 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
             return@update block(PagedPlayerInventoryPair(player, inventory))
         }
     }
+
 }

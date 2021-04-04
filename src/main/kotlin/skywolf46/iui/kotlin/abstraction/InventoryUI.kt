@@ -54,7 +54,7 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
 
         (ev.rawSlot < ev.inventory.size) {
             globalInnerClicker.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
-            innerClicker[ev.rawSlot]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
+            innerClicker[ev.slot]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))
         }.ifFalse {
             globalOuterClicker.forEach { it(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory)) }
             outerClicker[ev.slot]?.invoke(ev, PlayerInventoryPair(ev.whoClicked as Player, ev.inventory))

@@ -8,4 +8,7 @@ import skywolf46.iui.kotlin.abstraction.getUI
 class PagedPlayerInventoryPair(player: Player, inventory: Inventory) : PlayerInventoryPair(player, inventory) {
     fun page() = (inventory.getUI() as PagedInventoryUI).getPage(inventory)
     fun page(page: Int) = (inventory.getUI() as PagedInventoryUI).setPage(player, inventory, page)
+    fun pageStart(itemPerPage: Int) = (page() - 1) * itemPerPage
+    fun pageEnd(itemPerPage: Int) = page() * itemPerPage
+    fun pageRange(itemPerPage: Int) = (page() - 1) * itemPerPage..page() * itemPerPage
 }

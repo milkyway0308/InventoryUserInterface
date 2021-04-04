@@ -2,6 +2,7 @@ package skywolf46.iui.kotlin.abstraction
 
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import skywolf46.iui.kotlin.data.PagedPlayerInventoryPair
@@ -49,6 +50,44 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
         previousPageListener(slot, { true }, block)
     }
 
+    fun pageUpdate(slot: Int, block: PagedPlayerInventoryPair.() -> ItemStack) {
+        update(slot) {
+            block(PagedPlayerInventoryPair(player, inventory))
+        }
+    }
+
+    fun pageClick(slot: Int, block: PagedPlayerInventoryPair.(InventoryClickEvent) -> Unit) {
+        click(slot) {
+            block(PagedPlayerInventoryPair(whoClicked as Player, inventory), this)
+        }
+    }
+
+
+    fun pageInnerClick(slot: Int, block: PagedPlayerInventoryPair.(InventoryClickEvent) -> Unit) {
+        innerClick(slot) {
+            block(PagedPlayerInventoryPair(whoClicked as Player, inventory), this)
+        }
+    }
+
+
+    fun pageOuterClick(slot: Int, block: PagedPlayerInventoryPair.(InventoryClickEvent) -> Unit) {
+        outerClick(slot) {
+            block(PagedPlayerInventoryPair(whoClicked as Player, inventory), this)
+        }
+    }
+
+
+    fun pageOuterDrag(slot: Int, block: PagedPlayerInventoryPair.(InventoryDragEvent) -> Unit) {
+        outerDrag(slot) {
+            block(PagedPlayerInventoryPair(whoClicked as Player, inventory), this)
+        }
+    }
+
+    fun pageInnerDrag(slot: Int, block: PagedPlayerInventoryPair.(InventoryDragEvent) -> Unit) {
+        innerDrag(slot) {
+            block(PagedPlayerInventoryPair(whoClicked as Player, inventory), this)
+        }
+    }
 
     @Suppress("UNCHECKED_CAST")
     fun previousPageListener(

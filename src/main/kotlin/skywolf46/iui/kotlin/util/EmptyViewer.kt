@@ -22,11 +22,25 @@ import skywolf46.iui.kotlin.abstraction.InventoryUI
 import java.util.*
 import kotlin.collections.HashMap
 
+operator fun <T : Any> Inventory.get(str: String): T? {
+    return EmptyViewer.from(this)?.get(str)
+}
+
+operator fun <T : Any> Inventory.set(str: String, data: T): T? {
+    EmptyViewer.from(this)?.set(str, data)
+    return data
+}
+
+ fun <T : Any> Inventory.remove(str: String): T? {
+    return EmptyViewer.from(this)?.remove(str)
+}
+
 class EmptyViewer(var uI: InventoryUI) : HumanEntity, IDataStore {
     private val uid = UUID.randomUUID()
     private val dataMap = HashMap<String, Any>()
 
     override fun has(str: String): Boolean = dataMap.containsKey(str)
+
     @Suppress("UNCHECKED_CAST")
 
     override operator fun <T : Any> get(str: String): T? = dataMap[str] as T?
@@ -37,7 +51,7 @@ class EmptyViewer(var uI: InventoryUI) : HumanEntity, IDataStore {
     }
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Any> remove(str: String): T = dataMap.remove(str) as T
+    override fun <T : Any> remove(str: String): T? = dataMap.remove(str) as T?
 
     override fun getName(): String {
         return "FakeViewer"

@@ -243,6 +243,10 @@ abstract class InventoryUI(val title: String, val invSize: Int) {
             inv.updateUI(pl)
             return inv
         }
+
+        fun openInventory(pl: Player) {
+            pl.openInventory(toInventory(pl))
+        }
     }
 }
 

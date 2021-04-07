@@ -2,6 +2,7 @@ package skywolf46.iui.kotlin.abstraction
 
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
+import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
@@ -25,6 +26,12 @@ abstract class PagedInventoryUI(val pageName: String, title: String, invSize: In
         nextPageListener(slot, { true }, block)
     }
 
+
+    fun closePage(pair: PagedPlayerInventoryPair.(InventoryCloseEvent) -> Unit) {
+        close {
+            pair(PagedPlayerInventoryPair(it.player, inventory), this)
+        }
+    }
 
     @Suppress("UNCHECKED_CAST")
     fun nextPageListener(
